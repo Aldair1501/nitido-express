@@ -1,0 +1,31 @@
+<?php
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\{TiendaController,CuentaController,CarritoController,PedidoController,AdminController};
+Route::get('/',[TiendaController::class,'index'])->name('tienda.index');
+Route::get('/producto/{producto:slug}',[TiendaController::class,'show'])->name('producto.show');
+Route::get('/ingresar',[CuentaController::class,'loginForm'])->name('login');
+Route::post('/ingresar',[CuentaController::class,'login'])->middleware('throttle:6,1')->name('login.post');
+Route::get('/registro',[CuentaController::class,'registerForm'])->name('register');
+Route::post('/registro',[CuentaController::class,'register'])->middleware('throttle:6,1')->name('register.post');
+Route::post('/salir',[CuentaController::class,'logout'])->middleware('auth')->name('logout');
+Route::get('/carrito',[CarritoController::class,'index'])->name('carrito.index');
+Route::post('/carrito/agregar/{producto}',[CarritoController::class,'add'])->name('carrito.add');
+Route::post('/carrito/actualizar/{producto}',[CarritoController::class,'update'])->name('carrito.update');
+Route::post('/carrito/eliminar/{producto}',[CarritoController::class,'remove'])->name('carrito.remove');
+Route::middleware('auth')->group(function(){
+ Route::get('/checkout',[PedidoController::class,'form'])->name('checkout');
+ Route::post('/checkout',[PedidoController::class,'store'])->name('checkout.store');
+ Route::get('/mis-pedidos',[PedidoController::class,'index'])->name('pedidos.index');
+ Route::get('/mis-pedidos/{pedido}',[PedidoController::class,'show'])->name('pedidos.show');
+ Route::prefix('admin')->name('admin.')->group(function(){
+  Route::get('/',[AdminController::class,'index'])->name('index');
+  Route::get('/productos',[AdminController::class,'products'])->name('products');
+  Route::get('/productos/nuevo',[AdminController::class,'create'])->name('create');
+  Route::post('/productos',[AdminController::class,'store'])->name('store');
+  Route::get('/productos/{producto}/editar',[AdminController::class,'edit'])->name('edit');
+  Route::put('/productos/{producto}',[AdminController::class,'update'])->name('update');
+  Route::post('/productos/{producto}/desactivar',[AdminController::class,'disable'])->name('disable');
+  Route::get('/pedidos',[AdminController::class,'orders'])->name('orders');
+  Route::post('/pedidos/{pedido}/estado',[AdminController::class,'orderStatus'])->name('orders.status');
+ });
+});
